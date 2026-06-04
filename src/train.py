@@ -9,6 +9,18 @@ def build_trainer(cfg: Config, model, tokenizer, train_ds, eval_ds):
     from trl import SFTConfig, SFTTrainer
 
     t = cfg.training
+    eval_strategy = t.get("eval_strategy", "steps")
+
+    # In-training eval is expensive. Disable it entirely ("no") for max speed, or
+    # cap it to a small slice so the loss curve stays cheap. Real accuracy metrics
+    # are computed afterward on the full test split.
+    if eval_strategy == "no":
+        eval_ds = None
+    elif eval_ds is not None:
+        cap = cfg.evaluation.get("eval_during_training_samples")
+        if cap and len(eval_ds) > cap:
+            eval_ds = eval_ds.select(range(cap))
+
     args = SFTConfig(
         output_dir=str(cfg.path("output_dir")),
         num_train_epochs=t["num_train_epochs"],
@@ -20,7 +32,7 @@ def build_trainer(cfg: Config, model, tokenizer, train_ds, eval_ds):
         weight_decay=t["weight_decay"],
         optim=t["optim"],
         logging_steps=t["logging_steps"],
-        eval_strategy="steps",
+        eval_strategy=eval_strategy,
         eval_steps=t["eval_steps"],
         save_strategy="steps",
         save_steps=t["save_steps"],

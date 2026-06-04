@@ -34,24 +34,28 @@ data:
   max_samples: null
 
 training:
-  num_train_epochs: 1            # 60k examples * 1 epoch is plenty; bump to 2-3 if underfit
-  per_device_train_batch_size: 2
-  gradient_accumulation_steps: 8 # effective batch = 16
+  num_train_epochs: 1            # 1 epoch over all 48k examples is plenty
+  per_device_train_batch_size: 8 # bigger batch uses the spare T4 VRAM -> fewer steps
+  gradient_accumulation_steps: 4 # effective batch = 32  (~1500 steps for 48k)
   learning_rate: 2.0e-4
   lr_scheduler_type: cosine
   warmup_ratio: 0.03
   weight_decay: 0.01
   optim: adamw_8bit
-  logging_steps: 10
-  eval_steps: 100
-  save_steps: 200
+  logging_steps: 20
+  # In-training eval is the #1 time sink. Keep it rare + tiny; the real metrics
+  # come from the full test set later. Set eval_strategy: "no" for max speed.
+  eval_strategy: steps           # "steps" = cheap loss curve; "no" = fastest
+  eval_steps: 500                # ~3 evals per run instead of ~30
+  save_steps: 500
   save_total_limit: 2
   max_grad_norm: 1.0
   seed: 42
-  packing: false                
+  packing: false
 
 evaluation:
   num_test_samples: 500          # how many test-split rows to score (null = all)
+  eval_during_training_samples: 300  # cap the in-training eval set (cheap loss curve)
   max_new_tokens: 512
   temperature: 0.0               # deterministic decoding for fair comparison
   batch_size: 8
