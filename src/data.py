@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import ast
 import json
 import random
 from typing import Any
@@ -59,10 +60,23 @@ def to_openai_tool(tool: dict[str, Any]) -> dict[str, Any]:
     }
 
 def _maybe_json(value: Any) -> Any:
+    """Decode a string into Python objects, tolerating two encodings.
+
+    The gated dataset uses valid JSON. The ungated mirror stores tool specs as
+    Python ``repr`` strings (single quotes), which are not valid JSON — so we
+    fall back to ``ast.literal_eval`` for those.
+    """
     if isinstance(value, str):
+        s = value.strip()
+        if not s:
+            return value
         try:
-            return json.loads(value)
+            return json.loads(s)
         except json.JSONDecodeError:
+            pass
+        try:
+            return ast.literal_eval(s)
+        except (ValueError, SyntaxError):
             return value
     return value
 
