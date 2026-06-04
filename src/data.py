@@ -30,6 +30,7 @@ def _json_type(raw_type: str) -> str:
 
 
 def to_openai_tool(tool: dict[str, Any]) -> dict[str, Any]:
+    tool = _maybe_json(tool)  # tolerate a JSON-string tool entry
     properties: dict[str, Any] = {}
     required: list[str] = []
     for pname, spec in (tool.get("parameters") or {}).items():
@@ -66,24 +67,42 @@ def _maybe_json(value: Any) -> Any:
     return value
 
 
+def _as_dict_list(value: Any) -> list[dict[str, Any]]:
+    """Coerce a field into a list of dicts.
+
+    xLAM can be *double-encoded*: the column is a JSON string, and each element
+    inside the list is itself a JSON string. We decode both layers and keep only
+    the dict entries.
+    """
+    value = _maybe_json(value)
+    if not isinstance(value, list):
+        return []
+    out: list[dict[str, Any]] = []
+    for item in value:
+        item = _maybe_json(item)
+        if isinstance(item, dict):
+            out.append(item)
+    return out
+
+
 def _normalize_primary(row: dict[str, Any]) -> dict[str, Any] | None:
-    tools = _maybe_json(row.get("tools"))
-    answers = _maybe_json(row.get("answers"))
+    tools = _as_dict_list(row.get("tools"))
+    answers = _as_dict_list(row.get("answers"))
     query = row.get("query")
-    if not (query and isinstance(tools, list) and isinstance(answers, list)):
+    if not (query and tools and answers):
         return None
     return {"query": query, "tools": tools, "answers": answers}
 
 
 def _normalize_mirror(row: dict[str, Any]) -> dict[str, Any] | None:
-    tools = _maybe_json(row.get("tools"))
+    tools = _as_dict_list(row.get("tools"))
     messages = _maybe_json(row.get("messages")) or []
     query = next((m.get("content") for m in messages if m.get("role") == "user"), None)
     answer_raw = next(
         (m.get("content") for m in messages if m.get("role") == "assistant"), None
     )
-    answers = _maybe_json(answer_raw)
-    if not (query and isinstance(tools, list) and isinstance(answers, list)):
+    answers = _as_dict_list(answer_raw)
+    if not (query and tools and answers):
         return None
     return {"query": query, "tools": tools, "answers": answers}
 
@@ -163,4 +182,4 @@ def build_text_dataset(records: list[dict[str, Any]], tokenizer):
 
 
 def available_tool_names(record: dict[str, Any]) -> set[str]:
-    return {t["name"] for t in record["tools"]}
+    return {t["name"] for t in (_maybe_json(t) for t in record["tools"]) if isinstance(t, dict)}
