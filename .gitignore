@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+.ipynb_checkpoints/
+
+# Data & model artifacts (large; regenerate via the pipeline)
+data/*.jsonl
+outputs/
+*.gguf
+*.safetensors
+*.bin
+llama.cpp/
+
+# HF / caches
+.cache/
+hf_cache/
+
+# Generated results (keep the dirs, ignore the big stuff)
+results/figures/*.png
+results/metrics/*.json
+!results/figures/.gitkeep
+!results/metrics/.gitkeep
+
+# OS / editor
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
