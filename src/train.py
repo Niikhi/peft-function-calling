@@ -3,12 +3,10 @@ from __future__ import annotations
 import json
 
 from .config import Config
-from .prompts import RESPONSE_TEMPLATE
 
 
 def build_trainer(cfg: Config, model, tokenizer, train_ds, eval_ds):
     from trl import SFTConfig, SFTTrainer
-    from trl import DataCollatorForCompletionOnlyLM
 
     t = cfg.training
     args = SFTConfig(
@@ -35,10 +33,6 @@ def build_trainer(cfg: Config, model, tokenizer, train_ds, eval_ds):
         report_to="none",
         fp16=True,
     )
-    collator = DataCollatorForCompletionOnlyLM(
-        response_template=RESPONSE_TEMPLATE,
-        tokenizer=tokenizer,
-    )
 
     trainer = SFTTrainer(
         model=model,
@@ -46,8 +40,24 @@ def build_trainer(cfg: Config, model, tokenizer, train_ds, eval_ds):
         train_dataset=train_ds,
         eval_dataset=eval_ds,
         args=args,
-        data_collator=collator,
     )
+
+    # Completion-only loss masking via Unsloth's helper (version-stable across
+    # the TRL releases that removed DataCollatorForCompletionOnlyLM). If it's
+    # unavailable for any reason, we fall back to plain full-text SFT — training
+    # still works, the model just also sees loss on the prompt tokens.
+    try:
+        from unsloth.chat_templates import train_on_responses_only
+
+        trainer = train_on_responses_only(
+            trainer,
+            instruction_part="<|im_start|>user\n",
+            response_part="<|im_start|>assistant\n",
+        )
+        print("[train] completion-only masking enabled (assistant turns only).")
+    except Exception as e:  # noqa: BLE001
+        print(f"[train] completion-only masking unavailable ({e}); using full-text SFT.")
+
     return trainer
 
 
