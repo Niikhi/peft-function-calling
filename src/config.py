@@ -51,6 +51,15 @@ class Config:
         return self.raw["evaluation"]
 
     @property
+    def hub(self) -> dict[str, Any]:
+        """Checkpoint-backup settings. repo_id falls back to env HF_HUB_REPO_ID,
+        and push is auto-disabled if no repo is resolved."""
+        h = dict(self.raw.get("hub") or {})
+        h["repo_id"] = h.get("repo_id") or os.environ.get("HF_HUB_REPO_ID")
+        h["push_to_hub"] = bool(h.get("push_to_hub")) and bool(h["repo_id"])
+        return h
+
+    @property
     def gguf(self) -> dict[str, Any]:
         return self.raw["gguf"]
 

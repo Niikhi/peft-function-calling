@@ -9,7 +9,7 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))
 from src.config import load_config  
 from src.data import build_text_dataset, load_jsonl
 from src.model import add_lora, load_model_and_tokenizer
-from src.train import build_trainer, save_adapter, save_log_history
+from src.train import build_trainer, save_adapter, save_log_history, train_resumable
 from src.visualize import plot_loss_curves, plot_lr_schedule
 
 
@@ -29,7 +29,7 @@ def main() -> None:
     eval_ds = build_text_dataset(val_recs, tokenizer)
 
     trainer = build_trainer(cfg, model, tokenizer, train_ds, eval_ds)
-    trainer.train()
+    train_resumable(cfg, trainer)
 
     log_path = save_log_history(cfg, trainer)
     save_adapter(cfg, model, tokenizer)

@@ -47,11 +47,19 @@ training:
   # come from the full test set later. Set eval_strategy: "no" for max speed.
   eval_strategy: steps           # "steps" = cheap loss curve; "no" = fastest
   eval_steps: 500                # ~3 evals per run instead of ~30
-  save_steps: 500
+  save_steps: 100                # save often so a crash loses <=100 steps
   save_total_limit: 2
   max_grad_norm: 1.0
   seed: 42
   packing: false
+
+# Durable checkpoint backup. When push_to_hub is true, every saved checkpoint is
+# pushed to your HF Hub repo, so progress survives even a full Kaggle wipe. On a
+# fresh run, training resumes by pulling the latest checkpoint back down.
+hub:
+  push_to_hub: false             # set true to back up checkpoints to HF Hub
+  repo_id: null                  # "username/qwen2.5-3b-tool-calling" (or env HF_HUB_REPO_ID)
+  private: true
 
 evaluation:
   num_test_samples: 500          # how many test-split rows to score (null = all)
