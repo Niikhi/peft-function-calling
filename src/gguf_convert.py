@@ -23,7 +23,7 @@ def build_llama_cpp(cfg: Config, workdir) -> Path:
     repo = workdir / "llama.cpp"
     if not repo.exists():
         _run(["git", "clone", "--depth", "1", cfg.gguf["llama_cpp_repo"], str(repo)])
-    _run(["cmake", "-B", str(repo / "build"), "-S", str(repo), "-DGGML_CUDA=ON"])
+    _run(["cmake", "-B", str(repo / "build"), "-S", str(repo), "-DGGML_CUDA=OFF"])
     _run(["cmake", "--build", str(repo / "build"), "--config", "Release", "-j"])
     return repo
 
