@@ -121,7 +121,31 @@ The trained LoRA adapter is published on Hugging Face:
 
 ## Results & visualizations
 
-After running the pipeline, charts land in `results/figures/`:
+### Evaluation metrics — base vs fine-tuned (500 test samples)
+
+| Metric | Base | Fine-tuned | Δ |
+|---|---|---|---|
+| **Exact Match** | 0.726 | **0.840** | +11.4% |
+| **Name Accuracy** | 0.952 | **0.994** | +4.2% |
+| **Argument F1** | 0.850 | **0.917** | +6.7% |
+| **Hallucination Rate** | 0.004 | **0.000** | eliminated |
+| **Count Accuracy** | 0.956 | **0.996** | +4.0% |
+
+![Metric comparison](results/figures/metric_comparison.png)
+
+### Error breakdown
+
+![Error breakdown](results/figures/error_breakdown.png)
+
+### Training & validation loss
+
+![Loss curves](results/figures/loss_curves.png)
+
+### Learning rate schedule
+
+![LR schedule](results/figures/lr_schedule.png)
+
+After running the pipeline, all charts land in `results/figures/`:
 
 - `loss_curves.png` — training vs validation loss
 - `dataset_eda.png` — tools/query, calls/answer, query-length distributions
