@@ -71,6 +71,14 @@ peft-finetuning/
    ```
    (Accept the dataset terms on its HF page first.) If you skip this, the code
    automatically falls back to an ungated mirror.
+4. **(Optional but recommended)** Set your HF Hub repo for checkpoint backups:
+   ```python
+   import os
+   os.environ["HF_HUB_REPO_ID"] = "your-username/qwen2.5-3b-tool-calling"
+   ```
+   And set `hub.push_to_hub: true` in `config/config.yaml`.
+   Every checkpoint is then pushed to HF Hub — if the session dies, the next
+   run automatically downloads the latest checkpoint and resumes from there.
 
 Run order: **01 → 02 → 03 → 04**.
 
@@ -83,6 +91,31 @@ python scripts/run_train.py        # → outputs/adapter + loss curves
 python scripts/run_eval.py         # → metrics + comparison charts
 python scripts/convert_gguf.py     # → outputs/gguf/*.gguf
 ```
+
+---
+
+## Training summary
+
+| | Value |
+|---|---|
+| **Dataset** | Salesforce/xlam-function-calling-60k (48k train / 6k val / 6k test) |
+| **Base model** | Qwen2.5-3B-Instruct (4-bit QLoRA via Unsloth) |
+| **LoRA rank** | r=16, alpha=16, all attention + MLP layers |
+| **Steps** | 1,500 (1 epoch, effective batch 32) |
+| **Final train loss** | 0.0275 |
+| **Final val loss** | 0.0208 |
+| **Hardware** | Kaggle free T4 (16 GB) across multiple resumed sessions |
+
+> Training was completed across multiple Kaggle sessions using automatic checkpoint
+> resume — each restart picked up from the last saved checkpoint via HF Hub backup,
+> so no progress was ever lost.
+
+---
+
+## Fine-tuned adapter
+
+The trained LoRA adapter is published on Hugging Face:
+👉 **[Nikrobber/qwen2.5-3b-tool-calling](https://huggingface.co/Nikrobber/qwen2.5-3b-tool-calling)**
 
 ---
 
