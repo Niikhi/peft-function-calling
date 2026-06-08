@@ -19,7 +19,6 @@ llama.cpp/
 hf_cache/
 
 # Generated results (keep the dirs, ignore the big stuff)
-results/figures/*.png
 results/metrics/*.json
 !results/figures/.gitkeep
 !results/metrics/.gitkeep
