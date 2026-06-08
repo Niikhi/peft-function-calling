@@ -1,9 +1,28 @@
 # QLoRA Fine-Tuning Qwen2.5-3B for Structured Function Calling
 
-Fine-tuned **Qwen2.5-3B-Instruct** using **QLoRA + Unsloth** on 48,000 real human-curated
-examples to reliably convert natural-language requests into structured function/tool calls.
-Evaluated on a held-out test split with hard metrics, quantized to GGUF, and deployed locally
-via Ollama + Streamlit — no synthetic data, no vague claims.
+<!-- Demo video — upload to YouTube and replace the link below -->
+> 🎬 **[Watch demo](https://your-demo-link-here)**
+
+---
+
+Most LLM fine-tuning projects train on synthetic data, skip evaluation, and stop at a saved
+checkpoint. This one doesn't.
+
+I fine-tuned **Qwen2.5-3B-Instruct** end-to-end — from raw dataset to a locally running GGUF
+model — with a focus on actually measuring what improved and why. Training used **QLoRA via
+Unsloth** on 48,000 real human-curated tool-calling examples from Salesforce's xLAM dataset.
+The model was evaluated on a fully held-out 6,000-sample test split across five hard metrics,
+not just loss. The final adapter was quantized to GGUF and deployed locally with Ollama,
+with a Streamlit playground for interactive testing.
+
+The non-obvious engineering work: training ran across **three separate Kaggle sessions** (session
+timeouts, battery failures) without losing a single step — every checkpoint was automatically
+backed up to HF Hub during training and restored on the next session start, making the pipeline
+genuinely resumable. GGUF conversion was done with a CPU-only llama.cpp build to avoid needing
+a second GPU session.
+
+**The result:** exact match improved from 72.6% → 84.0%, hallucination dropped to zero, and
+the model runs locally in 1.84 GB.
 
 ---
 
