@@ -52,7 +52,7 @@ tab_play, tab_metrics = st.tabs(["🚀 Playground", "📊 Metrics"])
 with tab_play:
     with st.sidebar:
         st.header("Settings")
-        model_name = st.text_input("Ollama model", value="qwen-tools")
+        model_name = st.text_input("Ollama model", value="qwentools")
         st.markdown("Define the tools the model is allowed to call (xLAM JSON schema):")
 
     col_in, col_out = st.columns(2)
@@ -82,7 +82,7 @@ with tab_play:
             except Exception as e:  # noqa: BLE001
                 st.error(f"Inference failed: {e}")
                 st.info("Is Ollama running and the model created?\n\n"
-                        "`ollama create qwen-tools -f deploy/Modelfile`")
+                        "`ollama create qwentools -f deploy/Modelfile`")
                 st.stop()
 
             st.metric("Latency", f"{elapsed:.2f}s")

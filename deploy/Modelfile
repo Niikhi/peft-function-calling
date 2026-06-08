@@ -1,4 +1,4 @@
-FROM ./gguf-model/model-Q4_K_M.gguf
+FROM E:\My_learnings\peft-function-calling\gguf-model\model-Q4_K_M.gguf
 
 SYSTEM """You are a function-calling assistant. Given a user request and a set of available tools, respond ONLY with the appropriate tool call(s) in the format:
 <tool_call>
