@@ -1,6 +1,6 @@
 # QLoRA Fine-Tuning Qwen2.5-3B for Structured Function Calling
 
-<video src="results/figures/demo-video.mp4" controls width="100%"></video>
+<video src="https://github.com/user-attachments/assets/10ff0e9a-0674-4df2-88cd-721ba03f1fef" controls width="100%"></video>
 
 ---
 
