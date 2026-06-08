@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import json
 from typing import Any
 
 from .config import Config
@@ -42,30 +41,21 @@ class HFToolCaller:
         return {"raw": text, "tool_calls": parse_tool_calls(text)}
 
 
-def _build_prompt_no_tokenizer(query: str, tools: list[dict[str, Any]]) -> str:
-    tools_json = json.dumps(tools, indent=2)
-    return (
-        f"<|im_start|>system\nYou are a function-calling assistant. "
-        f"Given a user request and a set of available tools, respond ONLY with the "
-        f"appropriate tool call(s) in the format:\n"
-        f"<tool_call>\n{{\"name\": \"<function_name>\", \"arguments\": {{<args>}}}}\n</tool_call>\n\n"
-        f"Available tools:\n{tools_json}<|im_end|>\n"
-        f"<|im_start|>user\n{query}<|im_end|>\n"
-        f"<|im_start|>assistant\n"
-    )
-
-
 class OllamaToolCaller:
     def __init__(self, cfg: Config, model_name: str = "qwentools"):
         from ollama import Client
+        from transformers import AutoTokenizer
 
         self.cfg = cfg
         self.model_name = model_name
         self.client = Client()
+        self.tokenizer = AutoTokenizer.from_pretrained(cfg.model["hf_id"], trust_remote_code=True)
 
     def __call__(self, query: str, tools: list[dict[str, Any]]) -> dict[str, Any]:
+        from .prompts import build_prompt_text
+
         oa_tools = [to_openai_tool(t) for t in tools]
-        prompt = _build_prompt_no_tokenizer(query, oa_tools)
+        prompt = build_prompt_text(self.tokenizer, query, oa_tools)
         resp = self.client.generate(
             model=self.model_name,
             prompt=prompt,
