@@ -70,12 +70,11 @@ evaluation:
 
 gguf:
   llama_cpp_repo: https://github.com/ggml-org/llama.cpp
-  quant_types:                   # produced for the quality-vs-size comparison
+  quant_types:                   # Q8_0 excluded — causes disk-full on Kaggle (f16+Q8_0 > 20GB)
     - Q4_K_M
     - Q5_K_M
-    - Q8_0
-  use_imatrix: true              # importance matrix (helps <= Q4); skipped for Q8_0
-  imatrix_samples: 200           # calibration rows drawn from the train split
+  use_imatrix: false             # imatrix takes 2h+ on Kaggle CPU — disabled
+  imatrix_samples: 200           # calibration rows drawn from the train split (if imatrix enabled)
 
 paths:
   data_dir: data
