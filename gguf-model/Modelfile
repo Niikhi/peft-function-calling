@@ -1,0 +1,20 @@
+FROM ./model-Q4_K_M.gguf
+
+SYSTEM """You are a function-calling assistant. Given a user request and a set of available tools, respond ONLY with the appropriate tool call(s) in the format:
+<tool_call>
+{"name": "<function_name>", "arguments": {<args>}}
+</tool_call>"""
+
+TEMPLATE """{{ if .System }}<|im_start|>system
+{{ .System }}<|im_end|>
+{{ end }}{{ if .Prompt }}<|im_start|>user
+{{ .Prompt }}<|im_end|>
+{{ end }}<|im_start|>assistant
+{{ .Response }}<|im_end|>
+"""
+
+PARAMETER temperature 0.0
+PARAMETER top_p 0.9
+PARAMETER stop "<|im_end|>"
+PARAMETER stop "<|endoftext|>"
+PARAMETER num_ctx 4096
