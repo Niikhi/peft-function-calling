@@ -145,6 +145,16 @@ The trained LoRA adapter is published on Hugging Face:
 
 ![LR schedule](results/figures/lr_schedule.png)
 
+### Quantization — quality vs size
+
+| Quant | Size | Use case |
+|---|---|---|
+| f16 | 5,892 MB | Merging / further fine-tuning |
+| **Q4_K_M** | 1,840 MB | Best for local deployment (smallest) |
+| **Q5_K_M** | 2,122 MB | Best quality/size balance |
+
+![Quant quality vs size](results/figures/quant_quality_size.png)
+
 After running the pipeline, all charts land in `results/figures/`:
 
 - `loss_curves.png` — training vs validation loss
